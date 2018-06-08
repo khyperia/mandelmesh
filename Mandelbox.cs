@@ -11,10 +11,7 @@ namespace Mandelmesh
         const double _bailout = 1024.0;
         const int _max_iters = 32;
 
-        private static void Boxfold(ref Vector z, ref double dz)
-        {
-            z = z.Clamp(-_folding_limit, _folding_limit) * 2.0f - z;
-        }
+        private static void Boxfold(ref Vector z, ref double dz) => z = z.Clamp(-_folding_limit, _folding_limit) * 2.0f - z;
 
         private static void Spherefold(ref Vector z, ref double dz)
         {

@@ -15,12 +15,22 @@ namespace Mandelmesh
 {
     public class SurfaceNet
     {
-        private readonly Func<Vector, double> _field;
-        private readonly Func<Vector, Vector> _normalField;
-        private readonly TreeCoord _coords;
-        private readonly uint _resolution;
+        private Func<Vector, double> _field;
+        private Func<Vector, Vector> _normalField;
+        private TreeCoord _coords;
+        private uint _resolution;
+        private List<int> _cachedInd;
+        private List<Vector> _cachedVert;
+        private List<Vector> _cachedNorm;
 
-        public SurfaceNet(Func<Vector, double> field, Func<Vector, Vector> normalField, TreeCoord coords, uint resolution)
+        public SurfaceNet()
+        {
+            _cachedInd = new List<int>();
+            _cachedVert = new List<Vector>();
+            _cachedNorm = new List<Vector>();
+        }
+
+        public void Update(Func<Vector, double> field, Func<Vector, Vector> normalField, TreeCoord coords, uint resolution)
         {
             _field = field;
             _normalField = normalField;
@@ -30,13 +40,14 @@ namespace Mandelmesh
 
         public void Go(out int[] quadIndices, out Vector[] vertices, out Vector[] normals)
         {
-            var ind = new List<int>();
-            var vert = new List<Vector>();
-            var norm = new List<Vector>();
-            Go(ind, vert, norm);
-            quadIndices = ind.ToArray();
-            vertices = vert.ToArray();
-            normals = norm.ToArray();
+            // this shouldn't reset capacity
+            _cachedInd.Clear();
+            _cachedVert.Clear();
+            _cachedNorm.Clear();
+            Go(_cachedInd, _cachedVert, _cachedNorm);
+            quadIndices = _cachedInd.ToArray();
+            vertices = _cachedVert.ToArray();
+            normals = _cachedNorm.ToArray();
         }
 
         private void Go(List<int> quadIndices, List<Vector> vertices, List<Vector> normals)

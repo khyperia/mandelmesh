@@ -8,11 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.6.0.1625" />
-  </ItemGroup>
+ </ItemGroup>
 
   <Target Name="CopyQhyCcdDlls" AfterTargets="Build">
     <ItemGroup>
-      <NativeBinary Include="$(MSBuildProjectDirectory)/SDL2.dll" />
+      <NativeBinary Include="$(MSBuildProjectDirectory)/SDL2.dll;$(MSBuildProjectDirectory)/openvr_api.dll" />
     </ItemGroup>
     <Copy SkipUnchangedFiles="true" SourceFiles="@(NativeBinary)" DestinationFiles="@(NativeBinary->'$(OutputPath)\%(Filename).dll')" />
   </Target>

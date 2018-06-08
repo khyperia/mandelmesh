@@ -54,7 +54,8 @@ namespace Mandelmesh
 
     public class Tree
     {
-        private readonly Dictionary<TreeCoord, Chunk> _chunks;
+        // public accessor for enumeration only
+        public Dictionary<TreeCoord, Chunk> Chunks { get; }
         private readonly TreeCoord _root;
         private readonly ConcurrentQueue<TreeCoord> _toSplit; // main -> worker thread
         // del, addIndex, addValue
@@ -63,7 +64,7 @@ namespace Mandelmesh
         public Tree(TreeCoord root)
         {
             _root = root;
-            _chunks = new Dictionary<TreeCoord, Chunk>();
+            Chunks = new Dictionary<TreeCoord, Chunk>();
             _toSplit = new ConcurrentQueue<TreeCoord>();
             _toAdd = new ConcurrentQueue<(TreeCoord, TreeCoord[], Chunk[])>();
             _toSplit.Enqueue(_root);
@@ -72,11 +73,12 @@ namespace Mandelmesh
 
         private void WorkLoop()
         {
+            var surfaceNet = new SurfaceNet();
             while (true)
             {
                 if (_toSplit.TryDequeue(out var result))
                 {
-                    WorkOne(result);
+                    WorkOne(result, surfaceNet);
                 }
                 else
                 {
@@ -85,7 +87,7 @@ namespace Mandelmesh
             }
         }
 
-        private void WorkOne(TreeCoord input)
+        private void WorkOne(TreeCoord input, SurfaceNet surfaceNet)
         {
             var children = input.Children();
             var result = new Chunk[children.Length];
@@ -94,7 +96,7 @@ namespace Mandelmesh
                 var child = children[i];
                 Console.WriteLine($"Generating {child.X} {child.Y} {child.Z} {child.Depth}");
                 var chunk = new Chunk(child);
-                chunk.Render();
+                chunk.Render(surfaceNet);
                 result[i] = chunk;
             }
             _toAdd.Enqueue((input, children, result));
@@ -105,24 +107,22 @@ namespace Mandelmesh
             while (_toAdd.TryDequeue(out var result))
             {
                 var (toDel, addIndex, addValue) = result;
-                if (_chunks.ContainsKey(toDel))
+                if (Chunks.ContainsKey(toDel))
                 {
-                    var existing = _chunks[toDel];
-                    _chunks.Remove(toDel);
+                    var existing = Chunks[toDel];
+                    Chunks.Remove(toDel);
                     existing.Dispose();
                 }
                 for (var i = 0; i < addIndex.Length; i++)
                 {
                     finalize(addValue[i]);
-                    _chunks.Add(addIndex[i], addValue[i]);
-                    if (addIndex[i].Depth < 1)
-                    {
-                        _toSplit.Enqueue(addIndex[i]);
-                    }
+                    Chunks.Add(addIndex[i], addValue[i]);
+                    //if (addIndex[i].Depth < 1)
+                    //{
+                    //    _toSplit.Enqueue(addIndex[i]);
+                    //}
                 }
             }
         }
-
-        public IEnumerable<Chunk> Chunks => _chunks.Values;
     }
 }

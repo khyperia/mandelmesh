@@ -18,10 +18,10 @@ namespace Mandelmesh
             _coord = coord;
         }
 
-        public void Render()
+        public void Render(SurfaceNet surfaceNet)
         {
-            var net = new SurfaceNet(Mandelbox.De, Mandelbox.Normal, _coord, Constants.GridResolution);
-            net.Go(out _indices, out _vertices, out _normals);
+            surfaceNet.Update(Mandelbox.De, Mandelbox.Normal, _coord, Constants.GridResolution);
+            surfaceNet.Go(out _indices, out _vertices, out _normals);
         }
 
         public void Upload(GraphicsDevice device)
@@ -44,31 +44,22 @@ namespace Mandelmesh
             _vertexBuffer = new VertexBuffer(device, typeof(VertexPositionColor), convertedVerts.Length, BufferUsage.WriteOnly);
             _vertexBuffer.SetData(convertedVerts);
 
-            // var convertedVerts = new VertexPosition[_vertices.Length];
-            // for (var i = 0; i < convertedVerts.Length; i++)
-            // {
-            //     var vert = _vertices[i];
-            //     var norm = _normals[i];
-            //     convertedVerts[i] = new VertexPosition(
-            //         position: new Vector3((float)vert.X, (float)vert.Y, (float)vert.Z));
-            // }
-            // _vertexBuffer = new VertexBuffer(device, typeof(VertexPosition), convertedVerts.Length, BufferUsage.WriteOnly);
-            // _vertexBuffer.SetData(convertedVerts);
-
             _indexBuffer = new IndexBuffer(device, IndexElementSize.ThirtyTwoBits, _indices.Length, BufferUsage.WriteOnly);
             _indexBuffer.SetData(_indices);
         }
+
+        RasterizerState rasterizerState = new RasterizerState() { CullMode = CullMode.None };
 
         public void Draw(GraphicsDevice device, BasicEffect basicEffect)
         {
             device.Indices = _indexBuffer;
             device.SetVertexBuffer(_vertexBuffer);
-            device.RasterizerState = new RasterizerState() { CullMode = CullMode.None };
+            device.RasterizerState = rasterizerState;
 
             foreach (var pass in basicEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                device.DrawIndexedPrimitives(PrimitiveType.LineList, 0, 0, _indices.Length / 3);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, _indices.Length / 3);
             }
         }
 
