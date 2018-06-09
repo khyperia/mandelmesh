@@ -48,13 +48,13 @@ namespace Mandelmesh
             _indexBuffer.SetData(_indices);
         }
 
-        RasterizerState rasterizerState = new RasterizerState() { CullMode = CullMode.None };
+        private readonly RasterizerState _rasterizerState = new RasterizerState() { CullMode = CullMode.None };
 
         public void Draw(GraphicsDevice device, BasicEffect basicEffect)
         {
             device.Indices = _indexBuffer;
             device.SetVertexBuffer(_vertexBuffer);
-            device.RasterizerState = rasterizerState;
+            device.RasterizerState = _rasterizerState;
 
             foreach (var pass in basicEffect.CurrentTechnique.Passes)
             {

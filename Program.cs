@@ -52,7 +52,7 @@ namespace Mandelmesh
             _tree = new Tree(new TreeCoord(0, 0, 0, 0));
             _fpsTracker = new FpsTracker();
             _graphics.SynchronizeWithVerticalRetrace = false;
-            this.IsFixedTimeStep = false;
+            IsFixedTimeStep = false;
             Window.AllowUserResizing = true;
         }
 
